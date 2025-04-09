@@ -1,0 +1,50 @@
+name: Deploy Flutter Web
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      APP_ID: ${{ secrets.APP_ID }}
+      AUTH_DOMAIN: ${{ secrets.AUTH_DOMAIN }}
+      PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      SENDER_ID: ${{ secrets.SENDER_ID }}
+      STORAGE_BUCKET: ${{ secrets.STORAGE_BUCKET }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.3'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Inject API Key
+        run: |
+          echo "window.API_KEYS = {" > web/secrets.js
+          echo "  API_KEY: '${API_KEY}'," >> web/secrets.js
+          echo "  APP_ID: '${APP_ID}'," >> web/secrets.js
+          echo "  PROJECT_ID: '${PROJECT_ID}'," >> web/secrets.js
+          echo "  SENDER_ID: '${SENDER_ID}'," >> web/secrets.js
+          echo "  STORAGE_BUCKET: '${STORAGE_BUCKET}'," >> web/secrets.js
+          echo "  AUTH_DOMAIN: '${AUTH_DOMAIN}'" >> web/secrets.js
+          echo "};" >> web/secrets.js
+
+      - name: Build Flutter Web App
+        run: flutter build web --release
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: build/web
