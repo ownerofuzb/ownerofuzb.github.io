@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="refresh" content="0; URL=/" />
+    <meta charset="UTF-8" />
+    <script type="text/javascript">
+      // Preserve the path after redirecting to index.html
+      let path = window.location.pathname + window.location.search + window.location.hash;
+      sessionStorage.redirect = path;
+      window.location.replace('/');
+    </script>
   </head>
   <body>
   </body>
